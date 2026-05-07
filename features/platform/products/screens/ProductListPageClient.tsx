@@ -32,7 +32,7 @@ import { buildWhereClause } from '../../../dashboard/lib/buildWhereClause'
 interface ProductListPageClientProps {
   list: any
   initialData: { items: any[], count: number }
-  initialError: string | null
+  initialError?: string | null
   initialSearchParams: {
     page: number
     pageSize: number  
@@ -89,7 +89,7 @@ export function ProductListPageClient({
   // Extract current search params (reactive to URL changes)
   const currentSearchParams = useMemo(() => {
     const params: Record<string, string> = {}
-    searchParams.forEach((value, key) => {
+    searchParams?.forEach((value, key) => {
       params[key] = value
     })
     return params

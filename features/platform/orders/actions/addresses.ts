@@ -1,8 +1,8 @@
 'use server';
 
-import { keystoneClient } from '../../../dashboard/lib/keystoneClient';
+import { keystoneClient, type KeystoneResponse } from '../../../dashboard/lib/keystoneClient';
 
-export async function getCurrentUser() {
+export async function getCurrentUser(): Promise<KeystoneResponse<{ authenticatedItem?: { id: string; name?: string | null; email?: string | null } | null }>> {
   const query = `
     query GetCurrentUser {
       authenticatedItem {
@@ -19,7 +19,7 @@ export async function getCurrentUser() {
   return response;
 }
 
-export async function getAddresses(userId: string, limit: number = 10, skip: number = 0) {
+export async function getAddresses(userId: string, limit: number = 10, skip: number = 0): Promise<KeystoneResponse<{ addresses: any[]; addressesCount: number }>> {
   const query = `
     query GetUserAddresses($userId: ID!, $take: Int!, $skip: Int!) {
       addresses(
@@ -81,7 +81,7 @@ export async function createAddress(input: {
   postalCode: string;
   phone?: string;
   country: string;
-}) {
+}): Promise<KeystoneResponse<{ createAddress: { id: string } }>> {
   const { country, ...rest } = input;
 
   const mutation = `
@@ -109,7 +109,7 @@ export async function createAddress(input: {
   const currentUserResponse = await getCurrentUser();
   if (!currentUserResponse.success) {
     console.error('Failed to get current user:', currentUserResponse.error);
-    return { success: false, error: currentUserResponse.error };
+    return { success: false, error: currentUserResponse.error || 'Failed to get current user' };
   }
 
   const currentUser = currentUserResponse.data.authenticatedItem;

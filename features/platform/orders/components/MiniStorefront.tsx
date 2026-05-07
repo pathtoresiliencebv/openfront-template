@@ -65,6 +65,43 @@ interface CheckoutStep {
   completed: boolean;
 }
 
+type MiniCartItem = {
+  id: string;
+  title: string;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
+  variant: {
+    id: string;
+    title: string;
+    product: {
+      title: string;
+    };
+  };
+};
+
+type MiniCart = {
+  id: string;
+  items: MiniCartItem[];
+  subtotal: number;
+  total: number;
+  shippingTotal: number;
+  taxTotal: number;
+};
+
+type CheckoutFormData = {
+  "shippingAddress.firstName": string;
+  "shippingAddress.lastName": string;
+  "shippingAddress.address1": string;
+  "shippingAddress.company": string;
+  "shippingAddress.postalCode": string;
+  "shippingAddress.city": string;
+  "shippingAddress.countryCode": string;
+  "shippingAddress.province": string;
+  "shippingAddress.phone": string;
+  email: string;
+};
+
 const steps: CheckoutStep[] = [
   { id: "cart", name: "Create Cart", icon: ShoppingCart, completed: false },
   { id: "address", name: "Shipping Address", icon: MapPin, completed: false },
@@ -73,20 +110,20 @@ const steps: CheckoutStep[] = [
   { id: "review", name: "Review & Complete", icon: Check, completed: false },
 ];
 
-export function MiniStorefront({ 
-  regionCode = "us", 
+export function MiniStorefront({
+  regionCode = "us",
   customerId,
-  onSuccess 
+  onSuccess
 }: MiniStorefrontProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [activeStep, setActiveStep] = useState("cart");
   const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
   const [isPending, startTransition] = useTransition();
-  
+
   // State for data
   const [region, setRegion] = useState<any>(null);
-  const [cart, setCart] = useState<any>({ 
+  const [cart, setCart] = useState<MiniCart>({
     id: `temp-cart-${Date.now()}`,
     items: [],
     subtotal: 0,
@@ -103,12 +140,12 @@ export function MiniStorefront({
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [selectedShippingOptionId, setSelectedShippingOptionId] = useState("");
   const [selectedPaymentProvider, setSelectedPaymentProvider] = useState("");
-  
+
   // Search debounce ref
   const searchTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-  
+
   // Form state (using checkout form structure)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CheckoutFormData>({
     "shippingAddress.firstName": "",
     "shippingAddress.lastName": "",
     "shippingAddress.address1": "",
@@ -212,13 +249,13 @@ export function MiniStorefront({
   const fetchInitialData = async () => {
     try {
       console.log("=== Fetching initial data ===");
-      
+
       // Mock region data for now
       setRegion({ id: 'us', name: 'United States' });
-      
+
       // Load initial products
       await searchProducts("");
-      
+
     } catch (error) {
       console.error("Error fetching initial data:", error);
       setProducts([]);
@@ -245,7 +282,7 @@ export function MiniStorefront({
     setCart(prevCart => {
       const updatedItems = [...prevCart.items, newItem];
       const subtotal = updatedItems.reduce((sum, item) => sum + item.subtotal, 0);
-      
+
       return {
         ...prevCart,
         items: updatedItems,
@@ -258,46 +295,46 @@ export function MiniStorefront({
   // Add product to cart
   const handleAddToCart = async () => {
     if (!selectedVariant || !selectedProduct) return;
-    
+
     // Add to local cart state immediately
     addItemToCart(selectedProduct, selectedVariant);
-    
+
     // Reset selections
     setSelectedProduct(null);
     setSelectedVariant(null);
-    
+
     console.log("Item added to cart successfully");
   };
 
   // Submit shipping address
   const handleAddressSubmit = async () => {
     if (!cart) return;
-    
+
     // Validate required fields
-    const requiredFields = [
+    const requiredFields: Array<keyof CheckoutFormData> = [
       'shippingAddress.firstName',
-      'shippingAddress.lastName', 
+      'shippingAddress.lastName',
       'shippingAddress.address1',
       'shippingAddress.city',
       'shippingAddress.postalCode',
       'email'
     ];
-    
+
     const missingFields = requiredFields.filter(field => !formData[field]?.trim());
     if (missingFields.length > 0) {
       console.error("Missing required fields:", missingFields);
       return;
     }
-    
+
     startTransition(async () => {
       try {
         // For now, just store the address data locally
         console.log("Address data:", formData);
-        
+
         // Mark step as completed and move to next
         setCompletedSteps(prev => new Set([...prev, "address"]));
         setActiveStep("delivery");
-        
+
         // Mock shipping options for now
         setShippingOptions([
           { id: 'standard', name: 'Standard Shipping', amount: 1000, provider: { name: 'Standard' } },
@@ -312,13 +349,13 @@ export function MiniStorefront({
   // Select shipping method
   const handleShippingSelect = async () => {
     if (!cart || !selectedShippingOptionId) return;
-    
+
     startTransition(async () => {
       try {
         // Mark step as completed and move to next
         setCompletedSteps(prev => new Set([...prev, "delivery"]));
         setActiveStep("payment");
-        
+
         // Mock payment methods
         setPaymentMethods([
           { id: 'stripe', name: 'Credit Card', description: 'Pay with credit card' },
@@ -333,7 +370,7 @@ export function MiniStorefront({
   // Set payment method
   const handlePaymentSelect = async () => {
     if (!cart || !selectedPaymentProvider) return;
-    
+
     startTransition(async () => {
       try {
         // Mark step as completed and move to next
@@ -348,12 +385,12 @@ export function MiniStorefront({
   // Complete order
   const handleCompleteOrder = async () => {
     if (!cart) return;
-    
+
     startTransition(async () => {
       try {
         // Mock order creation - replace with actual API call
         const mockOrderId = `order-${Date.now()}`;
-        
+
         if (onSuccess) {
           onSuccess(mockOrderId);
           setOpen(false);
@@ -387,12 +424,12 @@ export function MiniStorefront({
   // Handle search input changes
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
-    
+
     // Clear existing timeout
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
-    
+
     // Debounce search to avoid too many requests
     searchTimeoutRef.current = setTimeout(() => {
       searchProducts(value);
@@ -424,7 +461,7 @@ export function MiniStorefront({
                     onChange={(e) => handleSearchChange(e.target.value)}
                   />
                 </div>
-                
+
                 <ScrollArea className="h-[250px]">
                   <div className="space-y-2 pr-4">
                     {filteredProducts.length === 0 ? (
@@ -488,9 +525,9 @@ export function MiniStorefront({
                         {selectedProduct.handle}
                       </p>
                     </div>
-                    
+
                     <Separator />
-                    
+
                     <div className="space-y-3">
                       <h4 className="text-sm font-medium">Select Variant</h4>
                       <ScrollArea className="h-[180px]">
@@ -667,7 +704,7 @@ export function MiniStorefront({
                 />
               </div>
             </div>
-            
+
             <Button
               className="w-full"
               onClick={handleAddressSubmit}
@@ -708,7 +745,7 @@ export function MiniStorefront({
                 </div>
               ))}
             </RadioGroup>
-            
+
             <Button
               className="w-full"
               onClick={handleShippingSelect}
@@ -744,7 +781,7 @@ export function MiniStorefront({
                 </div>
               ))}
             </RadioGroup>
-            
+
             <Button
               className="w-full"
               onClick={handlePaymentSelect}
@@ -767,7 +804,7 @@ export function MiniStorefront({
           <div className="space-y-4">
             <div className="space-y-3">
               <h3 className="font-medium">Order Summary</h3>
-              
+
               {/* Items */}
               <div className="space-y-2">
                 {cart?.items?.map((item: any) => (
@@ -777,9 +814,9 @@ export function MiniStorefront({
                   </div>
                 ))}
               </div>
-              
+
               <Separator />
-              
+
               {/* Totals */}
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
@@ -788,11 +825,11 @@ export function MiniStorefront({
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Shipping</span>
-                  <span>${(cart?.shipping_total / 100 || 0).toFixed(2)}</span>
+                  <span>${(cart.shippingTotal / 100 || 0).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Tax</span>
-                  <span>${(cart?.tax_total / 100 || 0).toFixed(2)}</span>
+                  <span>${(cart.taxTotal / 100 || 0).toFixed(2)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-medium">
@@ -801,7 +838,7 @@ export function MiniStorefront({
                 </div>
               </div>
             </div>
-            
+
             <Button
               className="w-full"
               onClick={handleCompleteOrder}
@@ -836,7 +873,7 @@ export function MiniStorefront({
         <Package className="mr-2 h-4 w-4" />
         Create Order
       </Button>
-      
+
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="overflow-hidden p-0 md:max-h-[600px] md:max-w-[900px] lg:max-w-[1000px]">
           <DialogTitle className="sr-only">Create Draft Order</DialogTitle>

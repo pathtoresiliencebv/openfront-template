@@ -11,7 +11,7 @@ import { PresetTabContent } from './PresetTabContent';
 import { NewProviderTabContent } from './NewProviderTabContent';
 import { StatusIndicator } from './StatusIndicator';
 import { createProviderShippingLabel, createManualFulfillment } from '@/features/platform/orders/actions';
-import type { Order, ShippingProvider, ShippingRate, Dimensions, Weight } from '../../lib/types';
+import type { Order, ShippingProvider, ShippingRate, Dimensions, Weight } from '../../types';
 import useSWR from 'swr';
 import { getShippingProviders } from '@/features/platform/orders/actions';
 import { toast } from 'sonner';

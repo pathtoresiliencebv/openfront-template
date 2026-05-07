@@ -1,3 +1,20 @@
+type PaymentWebhookInput = {
+  event: any;
+  headers: Record<string, string>;
+};
+
+type CreatePaymentInput = {
+  cart?: any;
+  amount: number;
+  currency: string;
+};
+
+type PaymentOperationInput = {
+  paymentId: string;
+  amount?: number;
+  currency?: string;
+};
+
 // Currencies that don't use decimal places (amount is in whole units, not cents)
 const NO_DIVISION_CURRENCIES = [
   "JPY", "KRW", "VND", "CLP", "PYG", "XAF", "XOF",
@@ -69,7 +86,7 @@ const getPayPalAccessToken = async () => {
   return access_token;
 };
 
-export async function handleWebhookFunction({ event, headers }) {
+export async function handleWebhookFunction({ event, headers }: PaymentWebhookInput) {
   const webhookId = process.env.PAYPAL_WEBHOOK_ID;
   if (!webhookId) {
     throw new Error('PayPal webhook ID is not configured');
@@ -110,7 +127,7 @@ export async function handleWebhookFunction({ event, headers }) {
   };
 }
 
-export async function createPaymentFunction({ cart, amount, currency }) {
+export async function createPaymentFunction({ cart, amount, currency }: CreatePaymentInput) {
   const accessToken = await getPayPalAccessToken();
   const baseUrl = getPayPalBaseUrl();
 
@@ -147,7 +164,7 @@ export async function createPaymentFunction({ cart, amount, currency }) {
   };
 }
 
-export async function capturePaymentFunction({ paymentId }) {
+export async function capturePaymentFunction({ paymentId }: PaymentOperationInput) {
   const accessToken = await getPayPalAccessToken();
   const baseUrl = getPayPalBaseUrl();
 
@@ -175,7 +192,7 @@ export async function capturePaymentFunction({ paymentId }) {
   };
 }
 
-export async function refundPaymentFunction({ paymentId, amount, currency = "USD" }) {
+export async function refundPaymentFunction({ paymentId, amount = 0, currency = "USD" }: PaymentOperationInput) {
   const accessToken = await getPayPalAccessToken();
   const baseUrl = getPayPalBaseUrl();
 
@@ -208,7 +225,7 @@ export async function refundPaymentFunction({ paymentId, amount, currency = "USD
   };
 }
 
-export async function getPaymentStatusFunction({ paymentId }) {
+export async function getPaymentStatusFunction({ paymentId }: PaymentOperationInput) {
   const accessToken = await getPayPalAccessToken();
   const baseUrl = getPayPalBaseUrl();
 
@@ -235,6 +252,6 @@ export async function getPaymentStatusFunction({ paymentId }) {
   };
 }
 
-export async function generatePaymentLinkFunction({ paymentId }) {
+export async function generatePaymentLinkFunction({ paymentId }: PaymentOperationInput) {
   return `https://www.paypal.com/activity/payment/${paymentId}`;
 } 

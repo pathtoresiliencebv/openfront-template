@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CirclePlus } from "lucide-react";
-import MiniStorefront from "./MiniStorefront";
+import { MiniStorefront } from "./MiniStorefront";
 
 export function OrderCreateButton() {
   const router = useRouter();

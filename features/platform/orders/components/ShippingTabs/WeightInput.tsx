@@ -4,16 +4,16 @@ import { Button } from '@/components/ui/button';
 import { useDebounce } from '@/features/platform/hooks/useDebounce';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { useState, useCallback, useEffect } from 'react';
-
+import type { Weight } from '../../types';
 
 interface WeightInputProps {
-  weight: any;
-  setWeight: (weight: any) => void;
+  weight: Weight;
+  setWeight: (weight: Weight) => void;
   readOnly?: boolean;
 }
 
 export function WeightInput({ weight, setWeight }: WeightInputProps) {
-  const [localWeight, setLocalWeight] = useState<any>(weight);
+  const [localWeight, setLocalWeight] = useState<Weight>(weight);
   const debouncedWeight = useDebounce(localWeight, 300);
 
   // Update parent state when debounced value changes
@@ -25,7 +25,7 @@ export function WeightInput({ weight, setWeight }: WeightInputProps) {
     setLocalWeight((prev) => ({ ...prev, value }));
   }, []);
 
-  const handleUnitChange = useCallback((unit: any['unit']) => {
+  const handleUnitChange = useCallback((unit: Weight['unit']) => {
     setLocalWeight((prev) => ({ ...prev, unit }));
   }, []);
 

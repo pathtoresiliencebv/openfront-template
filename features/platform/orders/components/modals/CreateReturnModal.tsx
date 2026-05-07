@@ -296,7 +296,7 @@ export const CreateReturnModal = ({ isOpen, onClose, order }: CreateReturnModalP
                       </div>
                     </div>
                     
-                    {returnItem?.quantity > 0 && (
+                    {(returnItem?.quantity || 0) > 0 && (
                       <div className="space-y-2">
                         <Label>Note (Optional)</Label>
                         <Textarea
@@ -331,7 +331,7 @@ export const CreateReturnModal = ({ isOpen, onClose, order }: CreateReturnModalP
                     <Checkbox
                       id="no-notification"
                       checked={noNotification}
-                      onCheckedChange={setNoNotification}
+                      onCheckedChange={(checked) => setNoNotification(Boolean(checked))}
                     />
                     <Label htmlFor="no-notification" className="text-sm">
                       Don't send notification email to customer

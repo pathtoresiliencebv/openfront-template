@@ -1,4 +1,4 @@
-import { Plus, Minus } from 'lucide-react';
+import { Plus, Minus, Package } from 'lucide-react';
 import { ProductImage } from '../../components/ProductImage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

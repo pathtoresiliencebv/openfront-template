@@ -11,9 +11,12 @@ import { PageBreadcrumbs } from '../../../dashboard/components/PageBreadcrumbs'
 import { useInvalidFields } from '../../../dashboard/utils/useInvalidFields'
 import { useHasChanges, serializeValueToOperationItem } from '../../../dashboard/utils/useHasChanges'
 import { enhanceFields } from '../../../dashboard/utils/enhanceFields'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { CardHeader,  CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -30,13 +33,16 @@ import {
   Copy,
   Trash2,
   RotateCcw,
-  Loader2,
   Package,
   Image,
   Box,
   Building,
   Tag,
-  Hash
+  Hash,
+  ExternalLink,
+  Info,
+  ShieldCheck,
+  TicketPercent
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { updateItemAction, deleteItemAction } from '../../../dashboard/actions/item-actions'
@@ -123,6 +129,17 @@ function deserializeItemToValue(enhancedFields: Record<string, any>, item: Recor
     }
   })
   return result
+}
+
+function getRelatedCount(value: unknown): number {
+  if (value && typeof value === 'object' && 'value' in (value as Record<string, unknown>)) {
+    const relationshipValue = (value as { value?: unknown }).value
+    if (Array.isArray(relationshipValue)) return relationshipValue.length
+    if (relationshipValue && typeof relationshipValue === 'object') return 1
+  }
+  if (Array.isArray(value)) return value.length
+  if (value && typeof value === 'object') return 1
+  return 0
 }
 
 export function ProductItemPageClient({ list, item, itemId }: ProductItemPageClientProps) {
@@ -232,6 +249,9 @@ export function ProductItemPageClient({ list, item, itemId }: ProductItemPageCli
     { type: 'link' as const, label: 'Products', href: '/platform/products' },
     { type: 'page' as const, label: pageLabel }
   ]
+
+  const discountEligibilityEnabled = Boolean((value as Record<string, unknown>).discountable)
+  const linkedTaxRateCount = getRelatedCount((value as Record<string, unknown>).taxRates)
 
   if (!item || Object.keys(item).length === 0) {
     return (
@@ -367,12 +387,12 @@ export function ProductItemPageClient({ list, item, itemId }: ProductItemPageCli
                 </CardContent>
               </Card>
 
-              {/* Status & Pricing Info */}
+              {/* Status */}
               <Card className="relative rounded-xl border border-transparent bg-card shadow ring-1 ring-foreground/5 dark:ring-white/10 overflow-hidden">
                 <CardHeader className="flex flex-row items-center justify-between px-4 py-3 border-b bg-muted/40">
                   <div className="flex items-center gap-2">
                     <Tag className="size-4 opacity-70 text-muted-foreground" />
-                    <span className="font-medium uppercase text-xs tracking-wider text-muted-foreground">Status & Display</span>
+                    <span className="font-medium uppercase text-xs tracking-wider text-muted-foreground">Status</span>
                   </div>
                 </CardHeader>
                 <CardContent className="p-5 space-y-5">
@@ -387,14 +407,49 @@ export function ProductItemPageClient({ list, item, itemId }: ProductItemPageCli
                           onChange={setValue}
                           forceValidation={forceValidation}
                           invalidFields={invalidFields}
-                          isRequireds={isRequireds}
+                          isRequireds={{ ...isRequireds, status: true }}
                         />
                       </div>
                     </div>
                   )}
+                </CardContent>
+              </Card>
 
-                  {Object.keys(fieldsSplit.discountTaxFields).length > 0 && (
-                    <div className="space-y-3 pt-5 border-t border-border/40">
+              {Object.keys(fieldsSplit.discountTaxFields).length > 0 && (
+                <Card className="relative rounded-xl border border-transparent bg-card shadow ring-1 ring-foreground/5 dark:ring-white/10 overflow-hidden">
+                  <CardHeader className="flex flex-row items-center justify-between px-4 py-3 border-b bg-muted/40">
+                    <div className="flex items-center gap-2">
+                      <TicketPercent className="size-4 opacity-70 text-muted-foreground" />
+                      <span className="font-medium uppercase text-xs tracking-wider text-muted-foreground">Discounts</span>
+                    </div>
+                    <Button asChild variant="outline" size="sm" className="h-7 text-xs">
+                      <Link href="/dashboard/platform/discounts">
+                        Open Discounts
+                        <ExternalLink className="size-3.5" />
+                      </Link>
+                    </Button>
+                  </CardHeader>
+                  <CardContent className="p-5 space-y-5">
+                    <div className="rounded-xl bg-muted/20 p-4 ring-1 ring-foreground/5 dark:ring-white/10">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Discount eligibility</div>
+                          <div className="mt-2 text-sm font-medium text-foreground">
+                            {discountEligibilityEnabled ? 'This product can receive discounts' : 'Discounts are turned off for this product'}
+                          </div>
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            Checkout discount calculation skips this product when discount eligibility is turned off.
+                          </p>
+                        </div>
+                        <Badge variant={discountEligibilityEnabled ? 'default' : 'secondary'}>
+                          <ShieldCheck className="mr-1 size-3" />
+                          {discountEligibilityEnabled ? 'Eligible' : 'Blocked'}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Discount settings</Label>
                       <Fields
                         list={list}
                         fields={fieldsSplit.discountTaxFields}
@@ -405,9 +460,23 @@ export function ProductItemPageClient({ list, item, itemId }: ProductItemPageCli
                         isRequireds={isRequireds}
                       />
                     </div>
-                  )}
-                </CardContent>
-              </Card>
+
+                    <Alert className="bg-indigo-500/5 text-indigo-700 border-indigo-500/20 dark:text-indigo-400">
+                      <Info className="size-4" />
+                      <AlertDescription>
+                        Use this product page for product-level eligibility. Manage shared discount codes, rule logic, schedules, stackability, regions, and advanced promotion setup from the Discounts area.
+                      </AlertDescription>
+                    </Alert>
+
+                    <div className="rounded-xl border border-dashed border-border/60 p-4">
+                      <div className="text-sm font-medium text-foreground">Tax mappings</div>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        This product currently has {linkedTaxRateCount} linked tax rate{linkedTaxRateCount === 1 ? '' : 's'}. Live cart tax is primarily calculated from the cart region, so treat product tax links as advanced mappings rather than the main tax engine.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Organization */}
               {Object.keys(fieldsSplit.organizationFields).length > 0 && (

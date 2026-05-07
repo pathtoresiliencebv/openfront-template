@@ -16,8 +16,5 @@ export { PaymentSelection } from './PaymentSelection';
 export { LineItemsManager } from './LineItemsManager';
 
 // ShippingTabs exports
-export { AddressFormCard } from './ShippingTabs/AddressFormCard';
 export { AddressSelect } from './ShippingTabs/AddressSelect';
-export { ShippingAddressTab } from './ShippingTabs/ShippingAddressTab';
-export { ShippingMethodsTab } from './ShippingTabs/ShippingMethodsTab';
-export { ShippingTabs } from './ShippingTabs/ShippingTabs';
+export { ShippingTabs } from './ShippingTabs';

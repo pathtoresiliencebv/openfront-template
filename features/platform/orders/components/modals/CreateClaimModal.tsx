@@ -457,7 +457,7 @@ export const CreateClaimModal = ({ isOpen, onClose, order }: CreateClaimModalPro
                         </div>
                       </div>
                       
-                      {claimItem?.quantity > 0 && (
+                      {(claimItem?.quantity || 0) > 0 && (
                         <>
                           <div className="space-y-2">
                             <Label>Note (Optional)</Label>
@@ -586,7 +586,7 @@ export const CreateClaimModal = ({ isOpen, onClose, order }: CreateClaimModalPro
                     <Checkbox
                       id="no-notification"
                       checked={noNotification}
-                      onCheckedChange={setNoNotification}
+                      onCheckedChange={(checked) => setNoNotification(Boolean(checked))}
                     />
                     <Label htmlFor="no-notification" className="text-sm">
                       Don't send notification email to customer

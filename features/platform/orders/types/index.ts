@@ -149,4 +149,51 @@ export interface FulfillmentHistoryProps {
   fulfillments: FulfillmentHistoryFulfillment[];
   order: FulfillmentHistoryOrder;
   onDelete: (id: string) => void;
+}
+
+export interface Dimensions {
+  length: string;
+  width: string;
+  height: string;
+  unit: 'in' | 'cm';
+}
+
+export interface Weight {
+  value: string;
+  unit: 'oz' | 'lb' | 'kg';
+}
+
+export interface ShippingProviderAddress {
+  id: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  company?: string | null;
+  address1?: string | null;
+  address2?: string | null;
+  city?: string | null;
+  province?: string | null;
+  postalCode?: string | null;
+  phone?: string | null;
+  country?: {
+    iso2?: string | null;
+    name?: string | null;
+  } | null;
+}
+
+export interface ShippingProvider {
+  id: string;
+  name: string;
+  isActive?: boolean | null;
+  accessToken?: string | null;
+  metadata?: Record<string, any> | null;
+  fromAddress?: ShippingProviderAddress | null;
+}
+
+export interface ShippingRate {
+  id: string;
+  provider?: string | null;
+  service: string;
+  carrier: string;
+  price: string;
+  estimatedDays: string;
 } 

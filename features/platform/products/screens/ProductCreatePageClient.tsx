@@ -104,51 +104,15 @@ export function ProductCreatePageClient({ listKey, list }: ProductCreatePageClie
   const createItem = useCreateItem(list, enhancedFields)
   const { regions, loading: regionsLoading, error: regionsError } = useRegions()
 
-  // Tab configuration following the same pattern as ProductItemPageClient
-  const tabs = [
-    {
-      id: "general",
-      label: "General", 
-      icon: Package,
-      description: "Basic product information like title, description, and handle",
-    },
-    {
-      id: "media",
-      label: "Media",
-      icon: Image, 
-      description: "Product images and gallery",
-    },
-    {
-      id: "variants",
-      label: "Variants",
-      icon: Box,
-      description: "Product variations, options, and inventory", 
-    },
-    {
-      id: "discounts",
-      label: "Discounts & Taxes",
-      icon: Tag,
-      description: "Pricing rules, discounts, and tax settings",
-    },
-    {
-      id: "organization", 
-      label: "Organization",
-      icon: Building,
-      description: "Categories, collections, tags, and status",
-    }
-  ]
-
   // Field distribution by tab following the same pattern as ProductItemPageClient
   const GENERAL_FIELDS = new Set(['title', 'handle', 'description', 'subtitle', 'isGiftcard'])
   const MEDIA_FIELDS = new Set(['productImages'])
   const VARIANT_FIELDS = new Set(['productVariants'])
-  const DISCOUNT_TAX_FIELDS = new Set(['discountable', 'discountConditions', 'discountRules', 'taxRates'])
+  const DISCOUNT_TAX_FIELDS = new Set(['discountable', 'taxRates'])
   const STATUS_FIELDS = new Set(['status'])
   const ORGANIZATION_FIELDS = new Set(['productCollections', 'productCategories', 'productTags'])
   const HIDDEN_FIELDS = new Set(['metadata', 'externalId', 'shippingProfile', 'productType', 'productOptions'])
 
-  // Tab state
-  const [activeTab, setActiveTab] = useState('general')
   const [variantMode, setVariantMode] = useState<VariantMode>('default')
   const [defaultVariant, setDefaultVariant] = useState<DefaultVariantState>({
     title: 'Default Title',
@@ -450,45 +414,6 @@ export function ProductCreatePageClient({ listKey, list }: ProductCreatePageClie
       }
     })
   }, [variantMode, defaultVariantRegions])
-
-  // Get tab error count - check for invalid fields in each tab (same pattern as item page)
-  const getTabErrorCount = useCallback((tabId: string) => {
-    if (!createItem?.props?.invalidFields) return 0
-    
-    let fieldsToCheck: Record<string, any> = {}
-    
-    switch (tabId) {
-      case 'general':
-        fieldsToCheck = fieldsSplit.generalFields
-        break
-      case 'media':
-        fieldsToCheck = fieldsSplit.mediaFields
-        break
-      case 'variants':
-        fieldsToCheck = fieldsSplit.variantFields
-        break
-      case 'discounts':
-        fieldsToCheck = fieldsSplit.discountTaxFields
-        break
-      case 'organization':
-        fieldsToCheck = fieldsSplit.organizationFields
-        break
-      case 'status':
-        fieldsToCheck = fieldsSplit.statusFields
-        break
-      default:
-        return 0
-    }
-
-    let errorCount = 0
-    Object.keys(fieldsToCheck).forEach(fieldKey => {
-      if (createItem.props.invalidFields.has(fieldKey)) {
-        errorCount++
-      }
-    })
-    
-    return errorCount
-  }, [fieldsSplit, createItem?.props?.invalidFields])
 
   return (
     <>
@@ -796,7 +721,7 @@ export function ProductCreatePageClient({ listKey, list }: ProductCreatePageClie
               <CardHeader className="flex flex-row items-center justify-between px-4 py-3 border-b bg-muted/40">
                 <div className="flex items-center gap-2">
                   <Tag className="size-4 opacity-70 text-muted-foreground" />
-                  <span className="font-medium uppercase text-xs tracking-wider text-muted-foreground">Status & Display</span>
+                  <span className="font-medium uppercase text-xs tracking-wider text-muted-foreground">Status</span>
                 </div>
               </CardHeader>
               <CardContent className="p-5 space-y-5">
@@ -804,18 +729,58 @@ export function ProductCreatePageClient({ listKey, list }: ProductCreatePageClie
                   <div className="space-y-3">
                     <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Product Status</Label>
                     <div className="[&_label]:hidden">
-                      <Fields {...createItem.props} fields={fieldsSplit.statusFields} view="createView" groups={list.groups} />
+                      <Fields
+                        {...createItem.props}
+                        fields={fieldsSplit.statusFields}
+                        view="createView"
+                        groups={list.groups}
+                        isRequireds={{ ...createItem.props.isRequireds, status: true }}
+                      />
                     </div>
-                  </div>
-                )}
-
-                {Object.keys(fieldsSplit.discountTaxFields).length > 0 && (
-                  <div className="space-y-3 pt-5 border-t border-border/40">
-                    <Fields {...createItem.props} fields={fieldsSplit.discountTaxFields} view="createView" groups={list.groups} />
                   </div>
                 )}
               </CardContent>
             </Card>
+
+            {Object.keys(fieldsSplit.discountTaxFields).length > 0 && (
+              <Card className="relative rounded-xl border border-transparent bg-card shadow ring-1 ring-foreground/5 dark:ring-white/10 overflow-hidden">
+                <CardHeader className="flex flex-row items-center justify-between px-4 py-3 border-b bg-muted/40">
+                  <div className="flex items-center gap-2">
+                    <Tag className="size-4 opacity-70 text-muted-foreground" />
+                    <span className="font-medium uppercase text-xs tracking-wider text-muted-foreground">Discounts</span>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-5 space-y-4">
+                  <div className="rounded-xl border border-dashed border-border/60 bg-muted/10 p-4">
+                    <div className="font-medium text-sm text-foreground">Configure discounts after the product is created</div>
+                    <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                      Product-specific discount targeting depends on the saved product record. Create the product first, then use the Discounts area to add this product to a promotion condition or review eligibility from the product page.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="space-y-3 pt-1">
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Discount eligibility</Label>
+                      <Fields
+                        {...createItem.props}
+                        fields={Object.fromEntries(
+                          Object.entries(fieldsSplit.discountTaxFields).filter(([, field]) => field.path === 'discountable')
+                        )}
+                        view="createView"
+                        groups={list.groups}
+                      />
+                    </div>
+
+                    <Alert className="bg-indigo-500/5 text-indigo-700 border-indigo-500/20 dark:text-indigo-400">
+                      <Info className="size-4" />
+                      <AlertDescription>
+                        Shared discount codes, rule logic, schedules, regions, and tax-rate records are managed after creation so this page stays focused on product setup.
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Organization */}
             {Object.keys(fieldsSplit.organizationFields).length > 0 && (

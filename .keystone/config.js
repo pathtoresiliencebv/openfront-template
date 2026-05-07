@@ -158,11 +158,11 @@ async function createPaymentFunction({ cart, amount, currency }) {
 async function capturePaymentFunction({ paymentId, amount }) {
   const stripe = getStripeClient();
   const paymentIntent = await stripe.paymentIntents.capture(paymentId, {
-    amount_to_capture: amount
+    ...amount ? { amount_to_capture: amount } : {}
   });
   return {
     status: paymentIntent.status,
-    amount: paymentIntent.amount_captured,
+    amount: paymentIntent.amount_received,
     data: paymentIntent
   };
 }
@@ -170,7 +170,7 @@ async function refundPaymentFunction({ paymentId, amount }) {
   const stripe = getStripeClient();
   const refund = await stripe.refunds.create({
     payment_intent: paymentId,
-    amount
+    ...amount ? { amount } : {}
   });
   return {
     status: refund.status,
@@ -209,7 +209,7 @@ async function handleWebhookFunction({ event, headers }) {
       resource: stripeEvent.data.object
     };
   } catch (err) {
-    throw new Error(`Webhook signature verification failed: ${err.message}`);
+    throw new Error(`Webhook signature verification failed: ${err instanceof Error ? err.message : String(err)}`);
   }
 }
 var import_stripe, getStripeClient;
@@ -223,7 +223,7 @@ var init_stripe = __esm({
         throw new Error("Stripe secret key not configured");
       }
       return new import_stripe.default(stripeKey, {
-        apiVersion: "2023-10-16"
+        apiVersion: "2025-05-28.basil"
       });
     };
   }
@@ -331,7 +331,7 @@ async function capturePaymentFunction2({ paymentId }) {
     data: capture
   };
 }
-async function refundPaymentFunction2({ paymentId, amount, currency = "USD" }) {
+async function refundPaymentFunction2({ paymentId, amount = 0, currency = "USD" }) {
   const accessToken = await getPayPalAccessToken();
   const baseUrl = getPayPalBaseUrl();
   const response = await fetch(
@@ -489,7 +489,7 @@ async function createPaymentFunction3({ cart, amount, currency }) {
     }
   };
 }
-async function capturePaymentFunction3({ paymentId, amount }) {
+async function capturePaymentFunction3({ paymentId, amount = 0 }) {
   return {
     status: "captured",
     amount,
@@ -500,7 +500,7 @@ async function capturePaymentFunction3({ paymentId, amount }) {
     }
   };
 }
-async function refundPaymentFunction3({ paymentId, amount }) {
+async function refundPaymentFunction3({ paymentId, amount = 0 }) {
   return {
     status: "refunded",
     amount,

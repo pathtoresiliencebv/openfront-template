@@ -1,4 +1,21 @@
-export async function handleWebhookFunction({ event, headers }) {
+type PaymentWebhookInput = {
+  event: any;
+  headers?: Record<string, string>;
+};
+
+type CreatePaymentInput = {
+  cart?: any;
+  amount: number;
+  currency: string;
+};
+
+type PaymentOperationInput = {
+  paymentId: string;
+  amount?: number;
+  currency?: string;
+};
+
+export async function handleWebhookFunction({ event, headers }: PaymentWebhookInput) {
   // Cash on Delivery payments don't have webhooks, but we'll provide a consistent interface
   return {
     isValid: true,
@@ -8,7 +25,7 @@ export async function handleWebhookFunction({ event, headers }) {
   };
 }
 
-export async function createPaymentFunction({ cart, amount, currency }) {
+export async function createPaymentFunction({ cart, amount, currency }: CreatePaymentInput) {
   // For Cash on Delivery payments, we just need to return a success status
   return {
     status: 'pending',
@@ -20,7 +37,7 @@ export async function createPaymentFunction({ cart, amount, currency }) {
   };
 }
 
-export async function capturePaymentFunction({ paymentId, amount }) {
+export async function capturePaymentFunction({ paymentId, amount = 0 }: PaymentOperationInput) {
   // Cash on Delivery payments are considered captured immediately
   return {
     status: 'captured',
@@ -33,7 +50,7 @@ export async function capturePaymentFunction({ paymentId, amount }) {
   };
 }
 
-export async function refundPaymentFunction({ paymentId, amount }) {
+export async function refundPaymentFunction({ paymentId, amount = 0 }: PaymentOperationInput) {
   // Cash on Delivery refunds need to be tracked manually
   return {
     status: 'refunded',
@@ -46,7 +63,7 @@ export async function refundPaymentFunction({ paymentId, amount }) {
   };
 }
 
-export async function getPaymentStatusFunction({ paymentId }) {
+export async function getPaymentStatusFunction({ paymentId }: PaymentOperationInput) {
   // Cash on Delivery payments are always considered successful unless manually marked otherwise
   return {
     status: 'succeeded',
@@ -56,7 +73,7 @@ export async function getPaymentStatusFunction({ paymentId }) {
   };
 }
 
-export async function generatePaymentLinkFunction({ paymentId }) {
+export async function generatePaymentLinkFunction({ paymentId }: PaymentOperationInput) {
   // Cash on Delivery payments don't have external links
   return null;
 }

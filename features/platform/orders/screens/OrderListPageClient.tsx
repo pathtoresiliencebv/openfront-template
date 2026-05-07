@@ -90,7 +90,7 @@ export function OrderListPageClient({
   // Extract current search params (reactive to URL changes)
   const currentSearchParams = useMemo(() => {
     const params: Record<string, string> = {}
-    searchParams.forEach((value, key) => {
+    searchParams?.forEach((value, key) => {
       params[key] = value
     })
     return params
@@ -325,17 +325,7 @@ export function OrderListPageClient({
       {/* Status Tabs - abstracted status filtering */}
       {statusCounts && (
         <div className="border-b">
-          <StatusTabs 
-            statusCounts={statusCounts} 
-            statusConfig={{
-              pending: { label: "Pending", color: "blue" },
-              completed: { label: "Completed", color: "emerald" },
-              archived: { label: "Archived", color: "zinc" },
-              canceled: { label: "Canceled", color: "rose" },
-              requires_action: { label: "Requires Action", color: "orange" },
-            }}
-            entityName="Orders"
-          />
+          <StatusTabs statusCounts={statusCounts} />
         </div>
       )}
 

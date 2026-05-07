@@ -75,7 +75,7 @@ export async function ProductListPage({ searchParams }: PageProps) {
     fetchedData = response.data
   } else {
     console.error('Error fetching products:', response.error)
-    error = response.error
+    error = response.error || 'Failed to fetch products'
   }
 
   // Get adminMeta for the list structure
@@ -106,7 +106,7 @@ export async function ProductListPage({ searchParams }: PageProps) {
     <ProductListPageClient
       list={enhancedList}
       initialData={fetchedData}
-      initialError={error}
+      initialError={error || undefined}
       initialSearchParams={{
         page: currentPage,
         pageSize,
