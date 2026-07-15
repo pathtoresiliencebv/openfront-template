@@ -1,9 +1,37 @@
-![openfront-ecommerce](https://github.com/user-attachments/assets/c54fc071-35a0-464c-8ccc-c5e9421ff0ff)
+# Openfront Commerce Template
 
+Production-minded starter template for a self-hosted Openfront storefront, admin dashboard, GraphQL API, payments, shipping and an optional Openship fulfillment layer.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fopenshiporg%2Fopenfront&env=SESSION_SECRET&products=%5B%7B%22type%22%3A%22integration%22%2C%22protocol%22%3A%22storage%22%2C%22group%22%3A%22postgres%22%7D%5D)
+[![Use this template](https://img.shields.io/badge/Use_this_template-2ea44f?logo=github&logoColor=white)](https://github.com/pathtoresiliencebv/openfront-template/generate)
+[![Template checks](https://github.com/pathtoresiliencebv/openfront-template/actions/workflows/template-check.yml/badge.svg)](https://github.com/pathtoresiliencebv/openfront-template/actions/workflows/template-check.yml)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+## Start in five minutes
+
+```bash
+cp .env.example .env
+docker compose up -d postgres
+npm ci
+npm run template:check
+npm run dev
+```
+
+Open the storefront at [localhost:3000](http://localhost:3000), the dashboard at [localhost:3000/dashboard](http://localhost:3000/dashboard), and GraphQL at [localhost:3000/api/graphql](http://localhost:3000/api/graphql).
+
+Want automated multi-channel fulfillment? Run this beside [pathtoresiliencebv/openship-template](https://github.com/pathtoresiliencebv/openship-template). The templates use separate ports and databases by default. See [the compatibility guide](docs/STACK_COMPATIBILITY.md) for the OAuth, webhook and deployment contract.
+
+> Based on [openshiporg/openfront](https://github.com/openshiporg/openfront). Upstream attribution and the MIT license are preserved. Template-specific changes are intentionally limited to setup, documentation and validation.
+
+## One-click deployment
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fpathtoresiliencebv%2Fopenfront-template&env=SESSION_SECRET&products=%5B%7B%22type%22%3A%22integration%22%2C%22protocol%22%3A%22storage%22%2C%22group%22%3A%22postgres%22%7D%5D)
 
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/openfront)
+
+## Upstream project
+
+![openfront-ecommerce](https://github.com/user-attachments/assets/c54fc071-35a0-464c-8ccc-c5e9421ff0ff)
+
 
 Openfront is a comprehensive e-commerce platform that provides everything you need to build and manage online stores. It includes a powerful admin dashboard, customer storefront, payment processing, inventory management, and advanced e-commerce features.
 
@@ -103,9 +131,9 @@ Openfront includes 78+ sophisticated data models covering:
 
 1. **Clone and install dependencies:**
    ```bash
-   git clone https://github.com/openship-org/openfront.git
-   cd openfront
-   npm install
+   git clone https://github.com/pathtoresiliencebv/openfront-template.git
+   cd openfront-template
+   npm ci
    ```
 
 2. **Configure environment variables:**

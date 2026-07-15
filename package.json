@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "keystone build --no-ui && npm run migrate && next dev",
+    "dev": "keystone build --no-ui && npm run migrate && next dev -p 3000",
     "build": "keystone build --no-ui && npm run migrate && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
+    "lint:template": "eslint scripts/template-check.mjs",
+    "template:check": "node scripts/template-check.mjs",
     "migrate:gen": "keystone build --no-ui && tsx features/keystone/view-order/generate-view-order.ts && keystone prisma migrate dev",
     "migrate": "prisma migrate deploy"
   },

@@ -1,0 +1,22 @@
+name: openfront-template
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: openfront
+      POSTGRES_USER: openfront
+      POSTGRES_PASSWORD: openfront
+    ports:
+      - "54321:5432"
+    volumes:
+      - openfront_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openfront -d openfront"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  openfront_postgres_data:
