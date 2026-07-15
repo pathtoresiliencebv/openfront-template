@@ -16226,7 +16226,15 @@ var keystone_default = withAuth(
     (0, import_core91.config)({
       db: {
         provider: "postgresql",
-        url: databaseURL
+        url: databaseURL,
+        extendPrismaSchema: (schema) => schema.replace(
+          /(generator [^}]+)}/g,
+          [
+            "$1",
+            '  binaryTargets = ["native", "rhel-openssl-3.0.x"]',
+            "}"
+          ].join("\n")
+        )
       },
       lists: models,
       storage: {

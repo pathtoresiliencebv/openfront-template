@@ -404,6 +404,15 @@ export default withAuth(
       db: {
         provider: "postgresql",
         url: databaseURL,
+        extendPrismaSchema: (schema) =>
+          schema.replace(
+            /(generator [^}]+)}/g,
+            [
+              "$1",
+              '  binaryTargets = ["native", "rhel-openssl-3.0.x"]',
+              "}",
+            ].join("\n")
+          ),
       },
       lists: models,
       storage: {
